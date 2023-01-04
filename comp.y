@@ -4,14 +4,7 @@
 #include <string.h>
 #include "functions.h"
 
-char TYPE[50];
-int flagError=0;
-int numOfIdentifiers=0;
-struct identifierStructure // ex: int a; -> identifiers[0].value=a && identifiers[0].data_type=int;
-{
-    char* data_type;
-    char* value;
-}identifiers[20];
+
 
 extern int yylineno;
 extern int yylex();
@@ -30,24 +23,22 @@ void yyerror(char *msg);
     int intValue;
     float floatValue;
     char charValue;
-    char* dataType;
     char* stringValue;
     bool boolValue;
 }
 
-%start s
-%token <intValue> INTEGER
-%token <floatValue> FLOAT
-%token <stringValue> STRING
-%token <charValue> CHAR
-%token <boolValue> BOOL
+%start start
+%token <intValue> INTEGER_VAL
+%token <floatValue> FLOAT_VAL
+%token <stringValue> STRING_VAL
+%token <charValue> CHAR_VAL
+%token <boolValue> BOOL_VAL
 %token <stringValue> IDENTIFICATOR
-
-%type <stringValue> DECLARATION
-%type <stringValue> EXPRESSION
+%token BEGIN_P END_P MAIN_F INTEGER FLOAT CHAR STRING BOOL IDENTIFICATOR
+%token IF WHILE FOR ELSE FUNCTION INCREMENTATION DECREMENTATION PRINT
 
 %left OR
-%left AND 
+%left AND NOT
 %left LESS_THAN LESS_EQ_THAN GREATER_THAN GREATER_EQ_THAN EQUAL NOT_EQUAL
 %left PLUS MINUS
 %left MULTIPLY DIVIDE MODULO
@@ -59,27 +50,100 @@ void yyerror(char *msg);
 // the order does matter (priority)
 
 %% //rules
-
-s : global_variables functions user_defined_data_types entry_point
-
-global_variables : data_type variable ";"
-
-data_type : 
-
-variable : 
-
-VALUE : INTEGER
-      | FLOAT
-      | STRING  
-      | CHAR    
-      | BOOL
+ 
+start : BEGIN_P declarations statements functions special_declarations END_P
       ;
 
-DECLARATION : EXPRESSION SEMICOLON
-            | FUNCTION SEMICOLON
-            | 
+declarations : declarations declaration ';'
+             | {}
+             ;
 
-EXP : EXP PLUS EXP {if(isInt($3))  {int a=atoi($1), b=atoi($3); int c=a+b;printf($$, "%d", c);}
+declaration :  INTEGER IDENTIFICATOR 
+            |  INTEGER IDENTIFICATOR '=' INTEGER_VAL
+            |  FLOAT IDENTIFICATOR 
+            |  FLOAT IDENTIFICATOR '=' FLOAT_VAL
+            |  STRING IDENTIFICATOR
+            |  STRING IDENTIFICATOR '=' STRING_VAL
+            |  CHAR IDENTIFICATOR
+            |  CHAR IDENTIFICATOR '=' CHAR_VAL
+            |  BOOL IDENTIFICATOR 
+            |  BOOL IDENTIFICATOR '=' BOOL_VAL 
+            |  types IDENTIFICATOR // pentru array-uri
+            ;
+types : type  
+      | types type 
+      ;
+
+type : '[' INTEGER_VAL ']' type // CUM ALOCAM MEMORIE PT ARRAY
+
+statements : statements statement ';'
+           | {}
+           ;
+statement : IF '(' condition ')' instructions
+          | IF '(' condition ')' instructions ELSE instructions
+          | WHILE '(' condition ')' instructions
+          | FOR '(' declaration ';' condition ';' incrementation ')' instructions
+          | PRINT '(' printList() ')'
+          ;
+conditions : conditions AND condition
+           | conditions OR condition
+           | conditions NOT condition
+           | {}
+           ;
+condition : INTEGER_VAL LESS_THAN INTEGER_VAL 
+          | INTEGER_VAL LESS_EQ_THAN INTEGER_VAL 
+          | INTEGER_VAL GREATER_THAN INTEGER_VAL 
+          | INTEGER_VAL GREATER_EQ_THAN INTEGER_VAL 
+          | INTEGER_VAL EQUAL INTEGER_VAL
+          | INTEGER_VAL NOT_EQUAL INTEGER_VAL
+          | FLOAT_VAL  LESS_THAN FLOAT_VAL
+          | FLOAT_VAL  LESS_EQ_THAN FLOAT_VAL
+          | FLOAT_VAL  GREATER_THAN FLOAT_VAL
+          | FLOAT_VAL  GREATER_EQ_THAN FLOAT_VAL
+          | FLOAT_VAL  EQUAL FLOAT_VAL
+          | FLOAT_VAL  NOT_EQUAL FLOAT_VAL
+          | STRING_VAL LESS_THAN STRING_VAL
+          | STRING_VAL LESS_EQ_THAN STRING_VAL
+          | STRING_VAL GREATER_THAN STRING_VAL
+          | STRING_VAL GREATER_EQ_THAN STRING_VAL
+          | STRING_VAL EQUAL STRING_VAL
+          | STRING_VAL NOT_EQUAL STRING_VAL
+          ;
+          
+instructions : instructions instruction 
+             | {}
+             ;
+instruction : incrementation 
+            | assign
+            | statement
+            | call_function
+            | return, break, daca vrem 10
+            ;
+incrementation : IDENTIFICATOR INCREMENTATION 
+               | INCREMENTATION IDENTIFICATOR
+               | IDENTIFICATOR DECREMENTATION
+               | DECREMENTATION IDENTIFICATOR 
+               ;
+assign : IDENTIFICATOR '=' E
+       ;
+
+E : E '+' T  {$$ = $1 + $3; }
+  | E '-' T  {$$ = $1 - $3; }
+  | T        {$$ = $1;}
+  ;
+
+T : T '*' F  {$$ = $1 * $3; }
+  | T '/' F  {$$ = $1 / $3; }
+  | F        {$$ = $1; }
+  ;
+
+F : '(' E ')'{$$ = $2; }
+  | '-' F    {$$ = -$2; }
+  | NUM      {$$ = $1; }
+  ;
+
+
+/* EXP : EXP PLUS EXP {if(isInt($3))  {int a=atoi($1), b=atoi($3); int c=a+b;printf($$, "%d", c);}
                       else if(isFloat($3)) {float a=atof($1), b=atof($3); float c=a+b;printf($$, "%f", c);}
                       else
                       {printf("ERROR! Line %d, expected integer or float value.\n", yylineno); flagError = 1;
@@ -103,7 +167,7 @@ EXP : EXP PLUS EXP {if(isInt($3))  {int a=atoi($1), b=atoi($3); int c=a+b;printf
                       {printf("ERROR! Line %d, expected integer or float value.\n", yylineno); flagError = 1;
                                 exit(0);}} 
 
-%%
+%% */
 
 void yyerror (char *msg)
 {
