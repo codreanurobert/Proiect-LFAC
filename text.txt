@@ -1,0 +1,25 @@
+start 
+
+DECLARATIONS
+int a=10;
+int b=9;
+float c=1.2;
+string d;
+char b='a';
+
+STATEMENTS
+if
+if else
+while
+for
+evaluare expresii
+print
+incrementari / decrementari
+
+faknaolgjsg
+{
+    a=b;
+    a++;
+    for(....)
+    
+}
