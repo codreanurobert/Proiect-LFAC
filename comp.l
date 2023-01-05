@@ -60,7 +60,6 @@
 [\'][a-zA-Z][\'] {yylval.charValue= strdup(yytext); return CHAR_VAL;}
 \".*\" {yylval.stringValue=strdup(yytext); return STRING_VAL;}
 [a-zA-Z][_a-zA-Z0-9]*   {yylval.stringValue=strdup(yytext); return IDENTIFICATOR;}
-
 [ \t] ;
 \n {yylineno++;} //backslash
 . {return yytext[0];}

@@ -29,29 +29,29 @@ void yyerror(char *msg);
 
 %start start
 %token <intValue> INTEGER_VAL
-%token <floatValue> FLOAT_VAL
+%token <floatValue> FLOAT_VAL 
 %token <stringValue> STRING_VAL
 %token <charValue> CHAR_VAL
 %token <boolValue> BOOL_VAL
 %token <stringValue> IDENTIFICATOR
-%token BEGIN_P END_P MAIN_F INTEGER FLOAT CHAR STRING BOOL IDENTIFICATOR
+%token BEGIN_P END_P MAIN_F INTEGER FLOAT CHAR STRING BOOL 
 %token IF WHILE FOR ELSE FUNCTION INCREMENTATION DECREMENTATION PRINT
 
-%left OR
+
+%left OR 
 %left AND NOT
 %left LESS_THAN LESS_EQ_THAN GREATER_THAN GREATER_EQ_THAN EQUAL NOT_EQUAL
 %left PLUS MINUS
 %left MULTIPLY DIVIDE MODULO
-%left SQ_BRACKETS_LEFT SQ_BRACKETS_RIGHT
-%left LEFT_PARAN RIGHT_PARAN
 %right ASIGN
 
 
 // the order does matter (priority)
 
 %% //rules
- 
-start : BEGIN_P declarations statements functions special_declarations END_P
+
+start : program {printf("\nLimbajul este corect dpdv sintactic\n")}
+program : BEGIN_P declarations statements functions special_declarations END_P
       ;
 
 declarations : declarations declaration ';'
@@ -126,22 +126,6 @@ incrementation : IDENTIFICATOR INCREMENTATION
                ;
 assign : IDENTIFICATOR '=' E
        ;
-
-E : E '+' T  {$$ = $1 + $3; }
-  | E '-' T  {$$ = $1 - $3; }
-  | T        {$$ = $1;}
-  ;
-
-T : T '*' F  {$$ = $1 * $3; }
-  | T '/' F  {$$ = $1 / $3; }
-  | F        {$$ = $1; }
-  ;
-
-F : '(' E ')'{$$ = $2; }
-  | '-' F    {$$ = -$2; }
-  | NUM      {$$ = $1; }
-  ;
-
 
 /* EXP : EXP PLUS EXP {if(isInt($3))  {int a=atoi($1), b=atoi($3); int c=a+b;printf($$, "%d", c);}
                       else if(isFloat($3)) {float a=atof($1), b=atof($3); float c=a+b;printf($$, "%f", c);}
