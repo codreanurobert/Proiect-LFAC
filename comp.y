@@ -85,9 +85,9 @@ statement : IF '(' condition ')' instructions
           | FOR '(' declaration ';' condition ';' incrementation ')' instructions
           | PRINT '(' printList() ')'
           ;
-conditions : conditions AND condition
-           | conditions OR condition
-           | conditions NOT condition
+conditions : condition AND conditions
+           | condition OR conditions
+           | condition NOT conditions
            | {}
            ;
 condition : INTEGER_VAL LESS_THAN INTEGER_VAL 
